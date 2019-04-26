@@ -63,10 +63,16 @@ public class App {
 	public static void generatePdfImages(String sourcePath) {
 		try {
 	        String sourceDir = sourcePath; // Pdf files are read from this folder
-	        String destinationDir = "C:/documents/Converted_PdfFiles_to_Image/"; 
+	        String destinationDir = "C:/documents/PDF to JPG/"; 
 
 	        File sourceFile = new File(sourceDir);
 	        File destinationFile = new File(destinationDir);
+	        
+//	        String sourceDir = sourcePath; // Pdf files are read from this folder
+//	        File sourceFile = new File(sourceDir);
+//	        String destinationDir = "C:/documents/Converted_PdfFiles_to_Image/" + sourceFile.getName().replace(".pdf", "") + "/"; 
+//	        File destinationFile = new File(destinationDir);
+	        
 	        if (!destinationFile.exists()) {
 	            destinationFile.mkdir();
 	            System.out.println("Folder Created -> "+ destinationFile.getAbsolutePath());
