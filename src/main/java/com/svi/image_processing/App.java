@@ -16,70 +16,40 @@ import com.aspose.words.SaveFormat;
 public class App {
 	public static void main(String args[]) throws Exception {
 		final String directoryPath = "C:\\documents\\";
-		final String sourcePath = "C:\\documents\\samplepdf.pdf";
-		File[] files  = new File (directoryPath).listFiles();
+		File[] files;  
 		
-		iterateFiles(files);
+		try {
+			files = new File(directoryPath).listFiles();
+			iterateFiles(files);
+		} catch (NullPointerException e) {
+			System.out.println(directoryPath +" does not exist.");
+		}
 	}
 	
 	public static void iterateFiles(File[] files) {
+		if(files.length == 0) {
+			System.out.println("Directory is empty.");
+			return;
+		}
 		for (File file : files) {
 	        if (file.isFile()) {
 	        	if(getExtension(file).equals(".pdf")){
-	        		generatePdfImages(file.getAbsolutePath());
+	        		generatePdfImages(file);
 	        	} else if(getExtension(file).equals(".doc") || getExtension(file).equals(".docx")) {
-	        		generateMsDocImages(file.getAbsolutePath());
+	        		generateMsDocImages(file);
 	        	}
 	        }
 	    }
 	}
 	
-	public static String getExtension(File file) {
-		String extension = "";
-		
-		try {
-            if (file != null && file.exists()) {
-                String name = file.getName();
-                extension = name.substring(name.lastIndexOf("."));
-            }
-        } catch (Exception e) {
-            extension = "";
-        }
- 
-        return extension;
-	}
-
-	public static void generateMsDocImages(final String sourcePath) {
-		try {
-			Document doc = new Document(sourcePath);
-			ImageSaveOptions options = new ImageSaveOptions(SaveFormat.JPEG);
-			options.setJpegQuality(100);
-			options.setResolution(100);
-
-			for (int i = 0; i < doc.getPageCount(); i++) {
-				String imageFilePath = sourcePath + "_output_" + i + ".jpg";
-				options.setPageIndex(i);
-				doc.save(imageFilePath, options);
-			}
-		} catch (Exception e) {
-			System.out.println("File is not a ms document type, trying pdf conversion.");
-			generatePdfImages(sourcePath);
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
-	public static void generatePdfImages(String sourcePath) {
+	public static void generatePdfImages(File file) {
 		try {
-	        String sourceDir = sourcePath; // Pdf files are read from this folder
-	        String destinationDir = "C:/documents/PDF to JPG/"; 
+	        String sourceDir = file.getAbsolutePath();
+	        String destinationDir = "C:/documents/PDF to JPG/"  + file.getName() + "/"; 
 
 	        File sourceFile = new File(sourceDir);
 	        File destinationFile = new File(destinationDir);
-	        
-//	        String sourceDir = sourcePath; // Pdf files are read from this folder
-//	        File sourceFile = new File(sourceDir);
-//	        String destinationDir = "C:/documents/Converted_PdfFiles_to_Image/" + sourceFile.getName().replace(".pdf", "") + "/"; 
-//	        File destinationFile = new File(destinationDir);
 	        
 	        if (!destinationFile.exists()) {
 	            destinationFile.mkdir();
@@ -109,5 +79,46 @@ public class App {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	}
+	
+	public static void generateMsDocImages(File file) {
+		try {
+			String sourceDir = file.getAbsolutePath();
+	        String destinationDir = "C:/documents/MS DOC to JPG/" + file.getName() + "/"; 
+
+	        Document doc = new Document(sourceDir);
+	        File destinationFile = new File(destinationDir);
+	        
+	        ImageSaveOptions options = new ImageSaveOptions(SaveFormat.JPEG);
+			options.setJpegQuality(100);
+			options.setResolution(100);
+			
+	        if (!destinationFile.exists()) {
+	            destinationFile.mkdir();
+	            System.out.println("Folder Created -> "+ destinationFile.getAbsolutePath());
+	        }
+			for (int i = 0; i < doc.getPageCount(); i++) {
+				String imageFilePath = destinationDir + file.getName() + "_output_" + i + ".jpg";
+				options.setPageIndex(i);
+				doc.save(imageFilePath, options);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getExtension(File file) {
+		String extension = "";
+		
+		try {
+            if (file != null && file.exists()) {
+                String name = file.getName();
+                extension = name.substring(name.lastIndexOf("."));
+            }
+        } catch (Exception e) {
+            extension = "";
+        }
+ 
+        return extension;
 	}
 }
