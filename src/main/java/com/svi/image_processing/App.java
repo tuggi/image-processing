@@ -1,47 +1,55 @@
 package com.svi.image_processing;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.w3c.dom.Node;
 
 import com.aspose.words.Document;
 import com.aspose.words.ImageSaveOptions;
 import com.aspose.words.SaveFormat;
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFPage;
 
-/**
- * Hello world!
- *
- */
 public class App {
 	public static void main(String args[]) throws Exception {
+		final String directoryPath = "C:\\documents\\";
 		final String sourcePath = "C:\\documents\\samplepdf.pdf";
-		generateImages(sourcePath);
+		File[] files  = new File (directoryPath).listFiles();
+		
+		iterateFiles(files);
+	}
+	
+	public static void iterateFiles(File[] files) {
+		for (File file : files) {
+	        if (file.isFile()) {
+	        	if(getExtension(file).equals(".pdf")){
+	        		generatePdfImages(file.getAbsolutePath());
+	        	} else if(getExtension(file).equals(".doc") || getExtension(file).equals(".docx")) {
+	        		generateMsDocImages(file.getAbsolutePath());
+	        	}
+	        }
+	    }
+	}
+	
+	public static String getExtension(File file) {
+		String extension = "";
+		
+		try {
+            if (file != null && file.exists()) {
+                String name = file.getName();
+                extension = name.substring(name.lastIndexOf("."));
+            }
+        } catch (Exception e) {
+            extension = "";
+        }
+ 
+        return extension;
 	}
 
-	public static void generateImages(final String sourcePath) {
+	public static void generateMsDocImages(final String sourcePath) {
 		try {
 			Document doc = new Document(sourcePath);
 			ImageSaveOptions options = new ImageSaveOptions(SaveFormat.JPEG);
