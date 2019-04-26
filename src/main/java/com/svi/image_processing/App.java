@@ -81,9 +81,9 @@ public class App {
 	            int pageNumber = 1;
 	            for (PDPage page : list) {
 	                BufferedImage image = page.convertToImage();
-	                File outputfile = new File(destinationDir + fileName +"_"+ pageNumber +".png");
+	                File outputfile = new File(destinationDir + fileName +"_"+ pageNumber +".jpg");
 	                System.out.println("Image Created -> "+ outputfile.getName());
-	                ImageIO.write(image, "png", outputfile);
+	                ImageIO.write(image, "jpg", outputfile);
 	                pageNumber++;
 	            }
 	            document.close();
