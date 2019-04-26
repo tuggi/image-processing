@@ -23,7 +23,6 @@ import javax.swing.ImageIcon;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.w3c.dom.Node;
 
 import com.aspose.words.Document;
@@ -55,91 +54,46 @@ public class App {
 				doc.save(imageFilePath, options);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			///////////////////////////////////////////
-			try {
-				String storagePath = sourcePath;
-
-				// Image Save Directory
-				String realPathtopdfImageSaveDir = "C://uploads/";
-
-				RandomAccessFile raf = new RandomAccessFile(storagePath, "r");
-				FileChannel channel = raf.getChannel();
-				ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-				PDFFile pdffile = new PDFFile(buf);
-
-				int numPgs = pdffile.getNumPages();
-
-				for (int i = 0; i < numPgs; i++) {
-					PDFPage page = pdffile.getPage(i);
-
-					Rectangle rect = new Rectangle(0, 0, (int) page.getBBox().getWidth(),
-							(int) page.getBBox().getHeight());
-
-					Image img = page.getImage(rect.width, rect.height, rect, null, true, true);
-
-					// save it as a file
-					BufferedImage bImg = toBufferedImage(img);
-					File yourImageFile = new File(realPathtopdfImageSaveDir + File.separator + "page_" + i + ".png");
-
-					ImageIO.write(bImg, "png", yourImageFile);
-				}
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			///////////////////////////////////////////
-
+			System.out.println("File is not a ms document type, trying pdf conversion.");
+			generatePdfImages(sourcePath);
 		}
 	}
-
-//	public static List<String> generatePdfImages(File pdfFile) throws IOException {
-//
-//		String imagePath = "/Users/$user/pdfimages/";
-//		List<String> fileNames = new ArrayList<String>();
-//		PDDocument document = PDDocument.load(pdfFile); //// load pdf
-//		PDPageTree node = document.getDocumentCatalog().getPages(); ///// get pages
-//		List<PDPage> kids = node.getKids();
-//		int count = 0;
-//		for (PDPage page : kids) { ///// iterate
-//			BufferedImage img = page.convertToImage(BufferedImage.TYPE_INT_RGB, 128);
-//			File imageFile = new File(imagePath + count++ + ".jpg");
-//			ImageIO.write(img, "jpg", imageFile);
-//			fileNames.add(imageFile.getName());
-//		}
-//		return fileNames;
-//	}
-
-	public static BufferedImage toBufferedImage(Image image) {
-		if (image instanceof BufferedImage) {
-			return (BufferedImage) image;
-		}
-
-		image = new ImageIcon(image).getImage();
-
-		BufferedImage bimage = null;
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	
+	@SuppressWarnings("unchecked")
+	public static void generatePdfImages(String sourcePath) {
 		try {
-			int transparency = Transparency.OPAQUE;
+	        String sourceDir = sourcePath; // Pdf files are read from this folder
+	        String destinationDir = "C:/documents/Converted_PdfFiles_to_Image/"; 
 
-			GraphicsDevice gs = ge.getDefaultScreenDevice();
-			GraphicsConfiguration gc = gs.getDefaultConfiguration();
-			bimage = gc.createCompatibleImage(image.getWidth(null), image.getHeight(null), transparency);
-		} catch (HeadlessException e) {
-			System.out.println("The system does not have a screen");
-		}
+	        File sourceFile = new File(sourceDir);
+	        File destinationFile = new File(destinationDir);
+	        if (!destinationFile.exists()) {
+	            destinationFile.mkdir();
+	            System.out.println("Folder Created -> "+ destinationFile.getAbsolutePath());
+	        }
+	        if (sourceFile.exists()) {
+	            System.out.println("Images copied to Folder: "+ destinationFile.getName());             
+	            PDDocument document = PDDocument.load(sourceDir);
+	            List<PDPage> list = document.getDocumentCatalog().getAllPages();
+	            System.out.println("Total files to be converted -> "+ list.size());
 
-		if (bimage == null) {
-			int type = BufferedImage.TYPE_INT_RGB;
-			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), type);
-		}
+	            String fileName = sourceFile.getName().replace(".pdf", "");             
+	            int pageNumber = 1;
+	            for (PDPage page : list) {
+	                BufferedImage image = page.convertToImage();
+	                File outputfile = new File(destinationDir + fileName +"_"+ pageNumber +".png");
+	                System.out.println("Image Created -> "+ outputfile.getName());
+	                ImageIO.write(image, "png", outputfile);
+	                pageNumber++;
+	            }
+	            document.close();
+	            System.out.println("Converted Images are saved at -> "+ destinationFile.getAbsolutePath());
+	        } else {
+	            System.err.println(sourceFile.getName() +" File not exists");
+	        }
 
-		Graphics g = bimage.createGraphics();
-
-		g.drawImage(image, 0, 0, null);
-		g.dispose();
-
-		return bimage;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
-
 }
